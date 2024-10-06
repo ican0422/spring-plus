@@ -17,6 +17,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -48,10 +50,10 @@ public class TodoService {
         );
     }
 
-    public Page<TodoResponse> getTodos(int page, int size) {
+    public Page<TodoResponse> getTodos(int page, int size, String weather, LocalDate startDate, LocalDate endDate) {
         Pageable pageable = PageRequest.of(page - 1, size);
 
-        Page<Todo> todos = todoRepository.findAllByOrderByModifiedAtDesc(pageable);
+        Page<Todo> todos = conditionalData(pageable, weather, startDate, endDate);
 
         return todos.map(todo -> new TodoResponse(
                 todo.getId(),
@@ -79,5 +81,45 @@ public class TodoService {
                 todo.getCreatedAt(),
                 todo.getModifiedAt()
         );
+    }
+
+    // 조건 별 데이터 가져오기
+    private Page<Todo> conditionalData(Pageable pageable, String weather, LocalDate startDate, LocalDate endDate) {
+        // 날씨 포함
+        if (weather != null) {
+            // 날씨가 포함된 수정 기간 검색 (시작 날짜만 포함)
+            if (startDate != null && endDate == null) {
+                return todoRepository.findByWeatherAndModifiedAtStartingWith(pageable, weather, startDate);
+            }
+
+            // 날씨가 포함된 수정 기간 검색 (엔드 날짜만 포함)
+            if (startDate == null && endDate != null) {
+                return todoRepository.findByWeatherAndModifiedAtLessThanEqual(pageable, weather, endDate);
+            }
+
+            // 날씨가 포함된 수정 기간 검색 (시작, 엔드 날짜 포함)
+            if (startDate != null && endDate != null) {
+                return todoRepository.findByWeatherAndModifiedAtBetween(pageable, weather, startDate, endDate);
+            }
+
+            return todoRepository.findAllByWeatherOrderByModifiedAtDesc(pageable, weather);
+        }
+
+        // 날씨 미포함
+        // 수정 기간으로 검색 (시작 날짜만 포함)
+        if (startDate != null && endDate == null) {
+            return todoRepository.findByModifiedAtStartingWith(pageable, startDate);
+        }
+        // 수정 기간으로 검색 (엔드 날짜만 포함)
+        if (startDate == null && endDate != null) {
+            return todoRepository.findByModifiedAtLessThanEqual(pageable, endDate);
+        }
+        // 수정기간으로 검색 (시작, 엔드 날짜 포함)
+        if (startDate != null && endDate != null) {
+            return todoRepository.findByModifiedAtBetween(pageable, startDate, endDate);
+        }
+
+        // 전부 포함 안될때
+        return todoRepository.findAllByOrderByModifiedAtDesc(pageable);
     }
 }
