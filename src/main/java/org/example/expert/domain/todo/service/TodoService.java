@@ -7,8 +7,10 @@ import org.example.expert.domain.common.exception.InvalidRequestException;
 import org.example.expert.domain.todo.dto.request.TodoSaveRequest;
 import org.example.expert.domain.todo.dto.response.TodoResponse;
 import org.example.expert.domain.todo.dto.response.TodoSaveResponse;
+import org.example.expert.domain.todo.dto.response.TodoSearchResponse;
 import org.example.expert.domain.todo.entity.Todo;
 import org.example.expert.domain.todo.repository.TodoRepository;
+import org.example.expert.domain.todo.repository.TodoRepositoryDSL;
 import org.example.expert.domain.user.dto.response.UserResponse;
 import org.example.expert.domain.user.entity.User;
 import org.springframework.data.domain.Page;
@@ -25,6 +27,7 @@ import java.time.LocalDate;
 public class TodoService {
 
     private final TodoRepository todoRepository;
+    private final TodoRepositoryDSL todoRepositoryDSL;
     private final WeatherClient weatherClient;
 
     @Transactional
@@ -63,6 +66,17 @@ public class TodoService {
                 new UserResponse(todo.getUser().getId(), todo.getUser().getEmail()),
                 todo.getCreatedAt(),
                 todo.getModifiedAt()
+        ));
+    }
+
+    public Page<TodoSearchResponse> searchTodos(String title, LocalDate startDate, LocalDate endDate, String nickname, int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<Todo> todos = todoRepositoryDSL.searchTasksInTodoList(title, startDate, endDate, nickname, pageable);
+
+        return todos.map(todo -> new TodoSearchResponse(
+                todo.getTitle(),
+                (long) todo.getManagers().size(),
+                (long) todo.getComments().size()
         ));
     }
 

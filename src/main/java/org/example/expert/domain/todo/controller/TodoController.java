@@ -6,6 +6,7 @@ import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.todo.dto.request.TodoSaveRequest;
 import org.example.expert.domain.todo.dto.response.TodoResponse;
 import org.example.expert.domain.todo.dto.response.TodoSaveResponse;
+import org.example.expert.domain.todo.dto.response.TodoSearchResponse;
 import org.example.expert.domain.todo.service.TodoService;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -40,6 +41,20 @@ public class TodoController {
             @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
             ) {
         return ResponseEntity.ok(todoService.getTodos(page, size, weather, startDate, endDate));
+    }
+
+    @GetMapping("/todos/search")
+    public ResponseEntity<Page<TodoSearchResponse>> searchTodos(
+            @RequestParam(name = "title", required = false) String title,
+            @RequestParam(name = "startDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(name = "endDate", required = false)
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(name = "nickname", required = false) String nickname,
+            @RequestParam(name = "page", defaultValue = "1") int page,
+            @RequestParam(name = "size", defaultValue = "10") int size
+    ) {
+        return ResponseEntity.ok(todoService.searchTodos(title, startDate, endDate, nickname, page, size));
     }
 
     @GetMapping("/todos/{todoId}")
