@@ -6,6 +6,11 @@ import lombok.NoArgsConstructor;
 import org.example.expert.domain.common.dto.AuthUser;
 import org.example.expert.domain.common.entity.Timestamped;
 import org.example.expert.domain.user.enums.UserRole;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+
+import java.util.Collection;
+import java.util.List;
 
 @Getter
 @Entity
@@ -37,7 +42,18 @@ public class User extends Timestamped {
     }
 
     public static User fromAuthUser(AuthUser authUser) {
-        return new User(authUser.getId(), authUser.getNickname(), authUser.getEmail(), authUser.getUserRole());
+        Collection<? extends GrantedAuthority> authorities = authUser.getAuthorities();
+        GrantedAuthority authority = authorities.stream().findFirst().orElseThrow(() -> new RuntimeException("권한 없음"));
+        String userRole = authority.getAuthority();
+        UserRole authRole;
+        if (userRole.equals("ROLE_USER")) {
+            authRole = UserRole.ROLE_USER;
+        } else if (userRole.equals("ROLE_ADMIN")) {
+            authRole = UserRole.ROLE_ADMIN;
+        } else {
+            throw new RuntimeException("잘못된 권한");
+        }
+        return new User(authUser.getId(), authUser.getNickname(), authUser.getEmail(), authRole);
     }
 
     public void changePassword(String password) {
