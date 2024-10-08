@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.example.expert.domain.log.eunm.LogSuccessfulStatus;
 import org.example.expert.domain.user.entity.User;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
 
