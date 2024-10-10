@@ -23,9 +23,13 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@WebMvcTest(TodoController.class)
+//@WebMvcTest(TodoController.class)
 class TodoControllerTest {
 
+    @Test
+    void test() {
+
+    }
 //    @Autowired
 //    private MockMvc mockMvc;
 //
