@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class HealthCheckController {
 
-    @GetMapping("check")
+    @GetMapping("/check")
     public String getCheck() {
         return "Server is Up";
     }
